@@ -1,0 +1,21 @@
+name:           GHCCore
+version:        0.1
+cabal-version:  >= 1.2
+build-type:     Simple
+
+executable GHCCore
+  build-depends:   
+                   base >= 4,
+                   ghc,
+                   ghc-paths,
+                   bytestring,
+                   binary,
+                   mtl,
+                   vhdl,
+                   VHDLGen,
+                   CorePrettyPrinter,
+                   containers
+  hs-source-dirs:  src
+  ghc-options:     -Wall -rtsopts
+  main-is:         Main.hs
+

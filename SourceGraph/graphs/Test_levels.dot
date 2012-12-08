@@ -1,0 +1,30 @@
+digraph "Levels within Test" {
+    node [margin="0.4,0.1"
+         ,style=filled];
+    subgraph cluster_0 {
+        graph [label="Exported root entities"
+              ,style=filled
+              ,fillcolor=lavender];
+        2 [label=main
+          ,shape=box
+          ,fillcolor=gold
+          ,style="filled,bold"];
+    }
+    subgraph cluster_1 {
+        graph [label="Level = 1"
+              ,style=filled
+              ,fillcolor=lavender];
+        1 [label=deserialize
+          ,shape=box
+          ,fillcolor=cyan
+          ,style="filled,bold"];
+        3 [label=serialize
+          ,shape=box
+          ,fillcolor=cyan
+          ,style="filled,bold"];
+    }
+    1 -> 1 [penwidth=1,color=black];
+    2 -> 1 [penwidth=1,color=black];
+    2 -> 3 [penwidth=1,color=black];
+    3 -> 3 [penwidth=1,color=black];
+}
