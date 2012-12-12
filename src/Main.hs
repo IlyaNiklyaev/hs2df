@@ -33,4 +33,4 @@ main = do
         --return $ concatMap rhssOfBind binds
         return binds
    --putStrLn.show.runWriter $ foldM vhdl emptyContext res
-   putStrLn.drawForest $ map (simplifyApps.foldApps.toTree) res
+   putStrLn.drawForest $ map ((fmap show).simplifyApps.foldApps.toTree.CNBind) res
