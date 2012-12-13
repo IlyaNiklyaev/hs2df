@@ -13,7 +13,11 @@ import VHDLGenerator(vhdl)
 import VHDLGenerator.DesignContext
 
 import CoreTree
-import Data.Tree (drawForest)
+import Data.Tree (drawForest, Tree)
+
+modifyAST :: Tree (CoreNode m) -> Tree (CoreNode m)
+--modifyAST = simplifyLambdas.foldLambdas.simplifyApps.foldApps
+modifyAST = foldLambdas.simplifyApps.foldApps
 
 main :: IO ()
 main = do
@@ -30,7 +34,5 @@ main = do
         d <- desugarModule t
         let c = coreModule d
         let binds = mg_binds c
-        --return $ concatMap rhssOfBind binds
         return binds
-   --putStrLn.show.runWriter $ foldM vhdl emptyContext res
-   putStrLn.drawForest $ map ((fmap show).simplifyApps.foldApps.toTree.CNBind) res
+   putStrLn.drawForest $ map ((fmap show).modifyAST.toTree.CNBind) res

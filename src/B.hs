@@ -1,8 +1,8 @@
 module Main where
 
-f = 1
-f2 = 2 + 3 * 18
+data X = Xc | Yc
 
-test3 x z = z - x
+fact 0 x = 1
+fact n x = n*fact(n-1) x
 
 main = print 3
