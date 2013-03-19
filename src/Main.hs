@@ -1,38 +1,45 @@
+{-# LANGUAGE StandaloneDeriving, TypeSynonymInstances, FlexibleInstances #-}
 module Main where
 
 import GHC 
 import GHC.Paths ( libdir ) 
 import DynFlags
-import HscTypes
-import CoreSyn
 import System.Environment
-import Control.Monad
-import Control.Monad.Writer
-
-import VHDLGenerator(vhdl)
-import VHDLGenerator.DesignContext
 
 import CoreTree
-import Data.Tree (drawForest, Tree)
+import Data.Tree
+import Data.Graph.Inductive
+import Tools
+import Data.Maybe (fromJust)
+import CoreSyn (CoreBndr)
+import GhcMonad (liftIO)
+import CoreGraph
+import Backend.Graphviz
 
 modifyAST :: Tree (CoreNode m) -> Tree (CoreNode m)
---modifyAST = simplifyLambdas.foldLambdas.simplifyApps.foldApps
-modifyAST = foldLambdas.simplifyApps.foldApps
+modifyAST = elimForAlls.nameApps.foldLambdas.foldApps
+
+modifyGraph :: Gr (CoreNode CoreBndr) () -> Gr CalcEntity ()
+modifyGraph = (nmap mkCalcEntity)
+
+setDynFlags :: [DynFlag] -> DynFlags -> DynFlags
+setDynFlags fls dflags = foldl dopt_set dflags fls
+
+unsetDynFlags :: [DynFlag] -> DynFlags -> DynFlags
+unsetDynFlags fls dflags = foldl dopt_unset dflags fls
 
 main :: IO ()
 main = do
-   (targetFile:_) <- getArgs
+   _ <- getArgs
    res <- defaultErrorHandler defaultLogAction $ runGhc (Just libdir) $ do
         dflags <- getSessionDynFlags
-        _ <- setSessionDynFlags dflags {importPaths = ["src\\"]}
-        target <- guessTarget targetFile Nothing
-        setTargets [target]
-        _ <- load LoadAllTargets
-        modSum <- getModSummary $ mkModuleName "Main"
-        p <- parseModule modSum
-        t <- typecheckModule p
-        d <- desugarModule t
-        let c = coreModule d
-        let binds = mg_binds c
-        return binds
-   putStrLn.drawForest $ map ((fmap show).modifyAST.toTree.CNBind) res
+        _ <- setSessionDynFlags $ setDynFlags [] $ unsetDynFlags [] $ dflags {optLevel = 1, importPaths = ["src"]}
+        --dflags <- getSessionDynFlags
+        --liftIO $ handleFlagWarnings dflags $ map (noLoc.show) $ filter (\ x -> dopt x dflags) [Opt_D_dump_cmm .. Opt_PackageTrust]
+        c <- compileToCoreSimplified "src\\B.hs"
+        return $ cm_binds c
+   let phase1 = map (modifyAST.toTree.CNBind) res
+   let intBinds = concatMap extractBinds phase1
+   let phase2 = intBinds ++ map (bindToAST.deleteLets) phase1
+   let phase3 = modifyGraph.treeToGraph.(substApps phase2).fromJust $ lookupCoreAST phase2 "main"
+   genGraphviz phase3

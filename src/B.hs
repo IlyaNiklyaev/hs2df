@@ -1,8 +1,22 @@
-module Main where
+module B where
 
-data X = Xc | Yc
+class TestClass m where
+        toB :: m -> Bool
 
-fact 0 x = 1
-fact n x = n*fact(n-1) x
+data TestData = One | Two
 
-main = print 3
+instance TestClass TestData where
+        toB One = False
+        toB Two = True
+
+main :: (Int, Int) -> Int
+--main 0 = 0
+--main 1 = 1
+--main y 
+--        | x <= 5 = 2
+--        | x <= 10 = 3
+--        | otherwise = 4
+--        where x = y + 1
+
+main (1,2) = 0
+main (_,_) = 3 + 4

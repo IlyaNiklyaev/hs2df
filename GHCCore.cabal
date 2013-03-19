@@ -14,8 +14,17 @@ executable GHCCore
                    vhdl,
                    VHDLGen,
                    CorePrettyPrinter,
-                   containers
+                   containers,
+                   dlist,
+                   fgl,
+                   ghc-prim,
+                   integer-gmp,
+                   Graphalyze
   hs-source-dirs:  src
   ghc-options:     -Wall -rtsopts
   main-is:         Main.hs
+  other-modules:   
+                   B,
+                   CoreGraph,
+                   Backend.Graphviz
 
