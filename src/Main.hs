@@ -9,7 +9,6 @@ import System.Environment
 import CoreTree
 import Data.Tree
 import Data.Graph.Inductive
-import Tools
 import Data.Maybe (fromJust)
 import CoreSyn (CoreBndr)
 import GhcMonad (liftIO)
@@ -19,7 +18,7 @@ import Backend.Graphviz
 modifyAST :: Tree (CoreNode m) -> Tree (CoreNode m)
 modifyAST = elimForAlls.nameApps.foldLambdas.foldApps
 
-modifyGraph :: Gr (CoreNode CoreBndr) () -> Gr CalcEntity ()
+modifyGraph :: Gr (CoreNode CoreBndr) EdgeRole -> Gr CalcEntity EdgeRole
 modifyGraph = (nmap mkCalcEntity)
 
 setDynFlags :: [DynFlag] -> DynFlags -> DynFlags
@@ -40,6 +39,8 @@ main = do
         return $ cm_binds c
    let phase1 = map (modifyAST.toTree.CNBind) res
    let intBinds = concatMap extractBinds phase1
-   let phase2 = intBinds ++ map (bindToAST.deleteLets) phase1
-   let phase3 = modifyGraph.treeToGraph.(substApps phase2).fromJust $ lookupCoreAST phase2 "main"
+   let phase2 = intBinds ++ map (bindToAST.deleteCaseBinds.deleteLets) phase1
+   print $ map (\ (x,y,_) -> (x,y)) phase2
+   --let phase3 = modifyGraph.treeToGraph.(substApps phase2).fromJust $ lookupCoreAST phase2 "main"
+   let phase3 = modifyGraph.treeToGraph.fromJust $ lookupCoreAST phase2 "main"
    genGraphviz phase3
