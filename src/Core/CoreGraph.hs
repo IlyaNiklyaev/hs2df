@@ -1,11 +1,11 @@
 {-# LANGUAGE StandaloneDeriving #-}
-module CoreGraph where
+module Core.CoreGraph where
 
 import Var
 import Literal
 import Type
-import CoreTools
-import CoreTree
+import Core.CoreTools
+import Core.CoreTree
 import CoreSyn
 import Outputable (showSDoc)
 import Data.Graph.Analysis.Algorithms.Directed (rootsOf)

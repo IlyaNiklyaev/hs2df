@@ -1,7 +1,7 @@
 module Backend.Graphviz where
 
 import Data.Graph.Inductive
-import CoreGraph
+import Core.CoreGraph
 
 printGraph :: Gr String String -> String
 printGraph gr =  graphviz gr "infograph" (8.5, 11) (1, 1) Portrait

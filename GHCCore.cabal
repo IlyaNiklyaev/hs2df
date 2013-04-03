@@ -13,7 +13,6 @@ executable GHCCore
                    mtl,
                    vhdl,
                    VHDLGen,
-                   CorePrettyPrinter,
                    containers,
                    dlist,
                    fgl,
@@ -25,6 +24,6 @@ executable GHCCore
   main-is:         Main.hs
   other-modules:   
                    B,
-                   CoreGraph,
-                   Backend.Graphviz
+                   Backend.Graphviz,
+                   Core.CoreGraph
 

@@ -6,13 +6,13 @@ import GHC.Paths ( libdir )
 import DynFlags
 import System.Environment
 
-import CoreTree
+import Core.CoreTree
 import Data.Tree
 import Data.Graph.Inductive
 import Data.Maybe (fromJust)
 import CoreSyn (CoreBndr)
 import GhcMonad (liftIO)
-import CoreGraph
+import Core.CoreGraph
 import Backend.Graphviz
 
 modifyAST :: Tree (CoreNode m) -> Tree (CoreNode m)
