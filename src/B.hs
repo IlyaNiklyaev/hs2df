@@ -9,11 +9,8 @@ instance TestClass TestData where
         toB One = False
         toB Two = True
 
-main :: Maybe Int -> Int
-main Nothing = 0
-main (Just 1) = 100
-main (Just 2) = 200
-main (Just y) = y + 300
+main :: Int -> Int -> Int
+main x y = x + y + 1
 
 --main 0 = 0
 --main 1 = 1
