@@ -32,5 +32,7 @@ executable GHCCore
                    Backend.VHDL.TopEntity,
                    Backend.VHDL.Types,
                    Backend.VHDL.Tools,
-                   Backend.VHDL.Param
+                   Backend.VHDL.Param,
+                   Backend.VHDL.If,
+                   Tools
 

@@ -42,4 +42,4 @@ main = do
    let phase2 = intBinds ++ map (bindToAST.splitCaseAlts.deleteCaseBinds.deleteLets) phase1
    let phase3 = modifyGraph.treeToGraph.(substApps phase2).fromJust $ lookupCoreAST phase2 "main"
    args <- getArgs
-   sequence_ $ map ($ phase3) $ map snd $ filter (\ (name, fun) -> name `elem` args) backends
+   sequence_ $ map ($ phase3) $ map snd $ filter (\ (name, _) -> name `elem` args) backends

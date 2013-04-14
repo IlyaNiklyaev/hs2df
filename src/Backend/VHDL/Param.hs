@@ -3,29 +3,21 @@ module Backend.VHDL.Param where
 import Var
 import Backend.VHDL.BuiltIn.Types
 import Backend.VHDL.Types
+import Data.List (intercalate)
+import Data.Graph.Inductive
+import Core.CoreGraph
+import Backend.VHDL.Tools
 
-paramPort :: Var -> Port
-paramPort var = [
-        ("first", "in",  "std_logic"),
-        ("nex", "in",  "std_logic"),
-        ("data", "out",  oBusType ++ " (" ++  show (oBusWidth - 1) ++ " downto 0)"),
-        ("ack", "out",  "std_logic"),
-        ("f0", "out",  "std_logic"),
-        ("n0", "out",  "std_logic"),
-        ("d0", "in",  oBusType ++ " (" ++  show (oBusWidth - 1) ++ " downto 0)"),
-        ("a0", "in",  "std_logic")
-        ] where
-                oBusType = (sType.snd.getTypeIface.varType) var
-                oBusWidth = (sArity.snd.getTypeIface.varType) var
-
-paramEntity :: String -> Var -> String
-paramEntity name var = unlines [
+paramEntity ::  Gr CalcEntity EdgeRole -> LNode CalcEntity -> String -> String
+paramEntity gr ln@(n,_) name = unlines [
         "library IEEE;",
         "use IEEE.std_logic_1164.all;",
         "use IEEE.numeric_std.all;",
+        "library IEEE_proposed;",
+        "use IEEE_proposed.float_pkg.all;",
         "entity " ++ name ++ " is",
         "    Port (",
-        init $ concatMap (\ (n, d, t) -> "\n        " ++ n ++ " : " ++ d ++ " " ++ t ++ ";") $ paramPort var,
+        intercalate ";\n" $ map (\ (n, d, t) -> "        " ++ n ++ " : " ++ d ++ " " ++ t) $ calcEntityPort gr ln,
         "          );",
         "end " ++ name ++ ";",
         "",
@@ -33,10 +25,12 @@ paramEntity name var = unlines [
         "",
         "begin",
         "",
-        "f0 <= first;",
-        "n0 <= nex;",
-        "ack <= a0;",
-        "data <= d0;",
+        (foldl (\ s i -> s ++ " or first" ++ show i) "f0 <= first0" [1..oCount - 1]) ++ ";",
+        (foldl (\ s i -> s ++ " or nex" ++ show i) "n0 <= nex0" [1..oCount - 1]) ++ ";",
+        concatMap (\ i -> unlines [
+        "ack" ++ show i ++ " <= a0;",
+        "data" ++ show i ++ " <= d0;"]) [0..oCount - 1],
         "",
         "end Behavioral;"
-        ]
+        ] where
+                oCount = length $ out gr n

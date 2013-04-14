@@ -6,7 +6,7 @@ import Core.CoreGraph
 
 type Port = [(String, String ,String)]
 
-data TypeIface = TypeIface {sArity :: Int, sType :: String}
+data TypeIface = TypeIface {sHigh :: Int, sLow :: Int, sType :: String}
 
 type TypePort = ([Type], Type)
 

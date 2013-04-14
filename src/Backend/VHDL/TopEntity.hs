@@ -10,15 +10,7 @@ import Backend.VHDL.Function
 import Backend.VHDL.Literal
 import Backend.VHDL.Param
 import Backend.VHDL.Tools
-
-nodePort :: Gr CalcEntity EdgeRole -> LNode CalcEntity -> Port
-nodePort gr n@(i, ce) = case ce of
-        (CELit l) -> literalPort l
-        (CEVar v) -> if isParamLN gr n then paramPort v else funcPort v
-        (CEExpr v) -> if isParamLN gr n then paramPort v else funcPort v
-        (CEPM v p) -> []
-        (CEIf t) -> []
-        _ -> []
+import Tools
 
 edgePortName :: Gr CalcEntity EdgeRole -> LNode CalcEntity -> LNode CalcEntity -> String -> String -> String
 edgePortName gr from to sFrom sTo = calcEntityName gr from ++ "_" ++ sFrom ++ "_" ++ calcEntityName gr to ++ "_" ++ sTo
@@ -28,18 +20,20 @@ topEntity name gr = unlines [
         "library IEEE;",
         "use IEEE.std_logic_1164.all;",
         "use IEEE.numeric_std.all;",
+        "library IEEE_proposed;",
+        "use IEEE_proposed.float_pkg.all;",
         "entity " ++ name ++ " is",
         concat ["    Port (\n",
         "           first : in  std_logic;\n",
         "           nex : in  std_logic;\n",
-        "           data : out  " ++ busType ++ " (" ++  show (busWidth - 1) ++ " downto 0);\n",
+        "           data : out  " ++ busType ++ " (" ++  show busHigh ++ " downto " ++  show busLow ++ ");\n",
         "           ack : out  std_logic",
-        concatMap (\ (t, a, i) -> concat [
+        concatMap (\ (t, i) -> concat [
                 ";\n           f" ++ show i ++ " : out  std_logic;\n",
                 "           n" ++ show i ++ " : out  std_logic;\n",
-                "           d" ++ show i ++ " : in  " ++ t ++ " (" ++  show (a - 1) ++ " downto 0);\n",
+                "           d" ++ show i ++ " : in  " ++ sType t ++ " (" ++  show (sHigh t) ++ " downto " ++  show (sLow t) ++ ");\n",
                 "           a" ++ show i ++ " : in  std_logic"
-                ]) $ zip3 (map (sType.calcEntityTypeIface.snd) params) (map (sArity.calcEntityTypeIface.snd) params) [0,1..]],
+                ]) $ zip (map (calcEntityTypeIface gr) params) [0,1..]],
         "          );",
         "end " ++ name ++ ";",
         "",
@@ -47,7 +41,7 @@ topEntity name gr = unlines [
         concatMap (\ node -> concat [
                 "    COMPONENT " ++ (calcEntityName gr node) ++ "\n",
                 "    PORT(",
-                init $ concatMap (\ (n, d, t) -> "\n        " ++ n ++ " : " ++ d ++ " " ++ t ++ ";") $ nodePort gr node,
+                intercalate ";\n" $ map (\ (n, d, t) -> "        " ++ n ++ " : " ++ d ++ " " ++ t) $ calcEntityPort gr node,
                 "\n        );\n",
                 "    END COMPONENT;\n"]) $ labNodes gr,
         concat $ concatMap (\ (from, to, pm) -> map (\(f, t, tp) -> "signal " ++ edgePortName gr from to f t ++ ": " ++ tp ++ ";\n") pm) nodeMap,
@@ -72,7 +66,7 @@ topEntity name gr = unlines [
                 ) $ zip params [0,1..],
         concatMap (\ node@(i, ce) -> concat [
                 "    inst" ++ show i ++ ": " ++ (calcEntityName gr node) ++ " PORT MAP (",
-                init $ concat $ concat [
+                safeInit $ concat $ concat [
                         concatMap (\ (from, to, pm) -> map (\(f, t, _) -> "\n        " ++ f ++ " => " ++ edgePortName gr from to f t ++ ",") pm) $ filter (\ (f,_,_) -> f == node) nodeMap,
                         concatMap (\ (from, to, pm) -> map (\(f, t, _) -> "\n        " ++ t ++ " => " ++ edgePortName gr from to f t ++ ",") pm) $ filter (\ (_,t,_) -> t == node) nodeMap],
                 "\n        );\n"]
@@ -80,8 +74,9 @@ topEntity name gr = unlines [
         "",
         "end Behavioral;"
         ] where
-                busType = (sType.calcEntityTypeIface.snd.head.leavesOf) gr
-                busWidth = (sArity.calcEntityTypeIface.snd.head.leavesOf) gr
+                busType = (sType.calcEntityTypeIface gr.head.leavesOf) gr
+                busHigh = (sHigh.calcEntityTypeIface gr.head.leavesOf) gr
+                busLow = (sLow.calcEntityTypeIface gr.head.leavesOf) gr
                 params = filter (isParamLN gr) $ labNodes gr
                 top = head $ leavesOf gr
                 nodeMap = map (getEdgePortMap gr) $ labEdges gr

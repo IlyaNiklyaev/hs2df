@@ -11,6 +11,7 @@ import Data.Monoid
 import DataCon (dataConUserType, dataConName)
 import Core.CoreTools
 import Data.Maybe (fromJust)
+import Tools
 
 data CoreNode m = CNBind (Bind m) | CNExpr (Expr m) | CNName m | CNAlt (AltCon, [m], Expr m) | CNPM m Int deriving Eq
 
@@ -47,7 +48,7 @@ isName (Node (CNName _) []) = True
 isName _ = False
 
 bindToAST :: Tree (CoreNode CoreBndr) -> (String, [String], Tree (CoreNode CoreBndr))
-bindToAST (Node (CNBind _) [Node (CNName var) [], Node (CNExpr (Lam _ _)) params]) = (getVarName var, map (\ (Node (CNName x) _) -> getVarName x) $ init params, last params)
+bindToAST (Node (CNBind _) [Node (CNName var) [], Node (CNExpr (Lam _ _)) params]) = (getVarName var, map (\ (Node (CNName x) _) -> getVarName x) $ safeInit params, last params)
 bindToAST (Node (CNBind _) [Node (CNName var) [], node]) = (getVarName var, [], node)
 bindToAST node = ("unnamed", [], node)
 

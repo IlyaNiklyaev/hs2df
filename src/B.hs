@@ -1,16 +1,7 @@
 module B where
 
-class TestClass m where
-        toB :: m -> Bool
-
-data TestData = One | Two
-
-instance TestClass TestData where
-        toB One = False
-        toB Two = True
-
-main :: Int -> Int -> Int
-main x y = x + y + 1
+main :: Float -> Float
+main x = (x * 2) / 3
 
 --main 0 = 0
 --main 1 = 1
