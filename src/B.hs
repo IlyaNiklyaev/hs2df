@@ -1,7 +1,7 @@
 module B where
 
 main :: Float -> Float
-main x = (x * 2) / 3
+main x = if x * 2 > 5 then x + 3 else x
 
 --main 0 = 0
 --main 1 = 1
