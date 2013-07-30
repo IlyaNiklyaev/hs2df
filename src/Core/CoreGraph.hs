@@ -60,9 +60,14 @@ mkCalcEntity (CNExpr (Lit l)) = CELit l
 mkCalcEntity (CNExpr (Case _ _ t _)) = (CEIf t)
 mkCalcEntity _ = CEError
 
+isVarNode :: LNode CalcEntity -> Bool
+isVarNode (_, CEVar _) = True
+isVarNode (_, CEExpr _) = True
+isVarNode _ = False
+
 mergeDupNodes :: Gr CalcEntity EdgeRole -> Gr CalcEntity EdgeRole
 mergeDupNodes gr = delNodes (map fst $ concatMap tail dups) $ insEdges (concatMap (\ (x:xs) -> [ (fst x, o, er) | (er, o) <- concatMap (\ (n, _) -> (\ (_, _, _, adj) -> adj) $ context gr n) xs]) dups) gr where
-        dups = filter (\ x -> length x > 1) $ groupBy (\ (_, n1) (_, n2) -> n1 == n2) $ sortBy (\ (_, n1) (_, n2) -> n1 `compare` n2)  $ rootsOf gr
+        dups = filter (\ x -> length x > 1) $ groupBy (\ (_, n1) (_, n2) -> n1 == n2) $ sortBy (\ (_, n1) (_, n2) -> n1 `compare` n2) $ filter isVarNode $ rootsOf gr
 
 getAltNumber :: (Eq m, Variable m) => Tree (CoreNode m) -> [Tree (CoreNode m)] -> Maybe EdgeRole
 getAltNumber node alts = case findIndex (== node) alts of

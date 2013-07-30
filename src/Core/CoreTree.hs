@@ -64,6 +64,7 @@ lookupCoreASTPar program name = case find (\ (var,_,_) -> var == name) program o
 
 treeMap' :: (Tree a -> Tree a) -> Tree a -> Tree a
 treeMap' f (Node val l) = f (Node val (map (treeMap' f) l))
+treeMap2' f (Node val l) = let (Node nval nl) = f (Node val l) in (Node nval (map (treeMap2' f) nl))
 --treeMap' f (Node val l) = let (Node nval nl) = f (Node val (map (treeMap' f) l)) in (Node nval (map (treeMap' f) nl))
 
 treeFoldMap' :: (Monoid m) => (Tree a -> m) -> m -> Tree a -> m
@@ -92,32 +93,32 @@ elimForAlls :: Tree (CoreNode m) -> Tree (CoreNode m)
 elimForAlls = treeMap' elimForAlls'
 
 substParams' :: [(String, Tree (CoreNode CoreBndr))] -> Tree (CoreNode CoreBndr) -> Tree (CoreNode CoreBndr)
-substParams' paramList (Node (CNExpr (Var var)) params) = case lookup (getVarName var) paramList of
+substParams' paramList n@(Node (CNExpr (Var var)) params) = case lookup (getVarName var) paramList of
+        Just (Node pval pparams) -> (Node pval (pparams ++ params))
+        Nothing -> n
+substParams' paramList n@(Node (CNExpr (Type t)) params) = case lookup (showSDoc $ pprType t) paramList of
         Just node -> node
-        Nothing -> (Node (CNExpr (Var var)) params)
-substParams' paramList (Node (CNExpr (Type t)) params) = case lookup (showSDoc $ pprType t) paramList of
-        Just node -> node
-        Nothing -> (Node (CNExpr (Type t)) params)
+        Nothing -> n
 substParams' _ n = n
 
 substParams :: [(String, Tree (CoreNode CoreBndr))] -> Tree (CoreNode CoreBndr) -> Tree (CoreNode CoreBndr)
-substParams paramList = treeMap' (substParams' paramList)
+substParams paramList = treeMap2' (substParams' paramList)
 
 substApps' :: CoreASTMap -> Tree (CoreNode CoreBndr) -> Tree (CoreNode CoreBndr)
 substApps' program (Node (CNExpr (Var var)) args) = case lookupCoreASTPar program (getVarName var) of
-        Just (params,node) -> substApps program $ substParams (zip params args) node
+        Just (params,node) -> substParams (zip params args) $ substApps program node
         Nothing -> (Node (CNExpr (Var var)) args)
 substApps' _ n = n
 
 substApps :: CoreASTMap -> Tree (CoreNode CoreBndr) -> Tree (CoreNode CoreBndr)
-substApps program = treeMap' (substApps' program)
+substApps program = treeMap2' (substApps' program)
 
-deleteLets' :: Tree (CoreNode m) -> Tree (CoreNode m)
-deleteLets' (Node (CNExpr (Let _ _)) [_, expr]) = expr
-deleteLets' n = n
+substLets' :: Tree (CoreNode CoreBndr) -> Tree (CoreNode CoreBndr)
+substLets' (Node (CNExpr (Let _ _)) [bind, expr]) = substApps [bindToAST bind] expr
+substLets' n = n
 
-deleteLets :: Tree (CoreNode m) -> Tree (CoreNode m)
-deleteLets = treeMap' deleteLets'
+substLets :: Tree (CoreNode CoreBndr) -> Tree (CoreNode CoreBndr)
+substLets = treeMap' substLets'
 
 deleteAltBinds :: Tree (CoreNode m) -> Tree (CoreNode m)
 deleteAltBinds (Node val@(CNName _) (expr:_)) = (Node val [expr])
@@ -136,7 +137,7 @@ mkCaseBinding exprn@(Node (CNExpr expr) _) (Node (CNName dcon) (_:binds)) = map 
 mkCaseBinding _ _ = []
 
 extractBinds' :: Tree (CoreNode CoreBndr) -> CoreASTMap
-extractBinds' (Node (CNExpr (Let _ _)) [bind, _]) = [bindToAST bind]
+--extractBinds' (Node (CNExpr (Let _ _)) [bind, _]) = [bindToAST bind]
 extractBinds' (Node (CNExpr (Case _ b _ _)) (expr:alts)) = (getVarName b, [], expr):(map bindToAST $ concatMap (mkCaseBinding expr) alts)
 extractBinds' _ = []
 

@@ -11,6 +11,8 @@ getFuncBody v = case getVarName v of
         "-" -> "data <= d0 - d1;"
         "*" -> "data <= resize(d0 * d1, " ++ if (sType.snd.getTypeIface.varType) v == "float" then "data'high, -data'low);" else " data'length);"
         "/" -> "data <= resize(d0 / d1, " ++ if (sType.snd.getTypeIface.varType) v == "float" then "data'high, -data'low);" else " data'length);"
+        "negate" -> "data <= - d0;"
+        "abs" -> "data <= abs(d0);"
         "I#" -> "data <= d0;"
         "F#" -> "data <= d0;"
         "D#" -> "data <= d0;"

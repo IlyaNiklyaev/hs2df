@@ -14,9 +14,11 @@ import CoreSyn (CoreBndr)
 import Core.CoreGraph
 import Backend.Graphviz
 import Backend.VHDL.VHDL
+import Backend.OpenCL
+import Control.Monad (when)
 
-modifyAST :: Tree (CoreNode m) -> Tree (CoreNode m)
-modifyAST = elimForAlls.nameApps.foldLambdas.foldApps
+modifyAST :: Tree (CoreNode CoreBndr) -> Tree (CoreNode CoreBndr)
+modifyAST = substLets.elimForAlls.nameApps.foldLambdas.foldApps
 
 modifyGraph :: Gr (CoreNode CoreBndr) EdgeRole -> Gr CalcEntity EdgeRole
 modifyGraph = mergeDupNodes.(nmap mkCalcEntity)
@@ -28,7 +30,7 @@ unsetDynFlags :: [DynFlag] -> DynFlags -> DynFlags
 unsetDynFlags fls dflags = foldl dopt_unset dflags fls
 
 backends :: [(String, Gr CalcEntity EdgeRole -> IO ())]
-backends = [("-vhdl", genVHDL), ("-graph", genGraphviz)]
+backends = [("-vhdl", genVHDL), ("-graph", genGraphviz), ("-opencl", genOpenCL)]
 
 main :: IO ()
 main = do
@@ -38,8 +40,10 @@ main = do
         c <- compileToCoreSimplified "src\\B.hs"
         return $ cm_binds c
    let phase1 = map (modifyAST.toTree.CNBind) res
-   let intBinds = concatMap extractBinds phase1
-   let phase2 = intBinds ++ map (bindToAST.splitCaseAlts.deleteCaseBinds.deleteLets) phase1
-   let phase3 = modifyGraph.treeToGraph.(substApps phase2).fromJust $ lookupCoreAST phase2 "main"
    args <- getArgs
+   when ("-dumpTree" `elem` args) $ putStrLn $ drawForest $ map (fmap show) phase1
+   let intBinds = concatMap extractBinds phase1
+   let phase2 = intBinds ++ map (bindToAST.splitCaseAlts.deleteCaseBinds) phase1
+   let phase3 = modifyGraph.treeToGraph.(substApps phase2).fromJust $ lookupCoreAST phase2 "main"
+   when ("-dumpBinds" `elem` args) $ print $ map (\ (x, y, _) -> (x,y)) phase2
    sequence_ $ map ($ phase3) $ map snd $ filter (\ (name, _) -> name `elem` args) backends

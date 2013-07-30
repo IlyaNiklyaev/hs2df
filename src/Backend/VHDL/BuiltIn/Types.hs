@@ -6,11 +6,11 @@ import Backend.VHDL.Types
 
 getTypeIface' :: Type -> TypeIface
 getTypeIface' t = case (showSDoc $ pprType t) of
-        "GHC.Prim.Int#" -> TypeIface {sHigh = 15, sLow = 0, sType = "signed"}
-        "GHC.Types.Int" -> TypeIface {sHigh = 15, sLow = 0, sType = "signed"}
+        "GHC.Prim.Int#" -> TypeIface {sHigh = 31, sLow = 0, sType = "signed"}
+        "GHC.Types.Int" -> TypeIface {sHigh = 31, sLow = 0, sType = "signed"}
         --"GHC.Num.Integer" -> TypeIface {sArity = 15, sType = "signed"}
-        "GHC.Prim.Char#" -> TypeIface {sHigh = 15, sLow = 0, sType = "unsigned"}
-        "GHC.Types.Char" -> TypeIface {sHigh = 15, sLow = 0, sType = "unsigned"}
+        "GHC.Prim.Char#" -> TypeIface {sHigh = 31, sLow = 0, sType = "unsigned"}
+        "GHC.Types.Char" -> TypeIface {sHigh = 31, sLow = 0, sType = "unsigned"}
         "GHC.Types.Bool" -> TypeIface {sHigh = 0, sLow = 0, sType = "unsigned"}
         "GHC.Prim.Float#" -> TypeIface {sHigh = 8, sLow = -23, sType = "float"}
         "GHC.Types.Float" -> TypeIface {sHigh = 8, sLow = -23, sType = "float"}

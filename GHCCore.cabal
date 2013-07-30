@@ -34,5 +34,6 @@ executable GHCCore
                    Backend.VHDL.Tools,
                    Backend.VHDL.Param,
                    Backend.VHDL.If,
-                   Tools
+                   Tools,
+                   Backend.OpenCL
 
