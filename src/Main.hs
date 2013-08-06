@@ -14,7 +14,7 @@ import CoreSyn (CoreBndr)
 import Core.CoreGraph
 import Backend.Graphviz
 import Backend.VHDL.VHDL
-import Backend.OpenCL
+import Backend.OpenCL.OpenCL
 import Control.Monad (when)
 
 modifyAST :: Tree (CoreNode CoreBndr) -> Tree (CoreNode CoreBndr)
