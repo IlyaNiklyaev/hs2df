@@ -37,16 +37,8 @@ emptyTypeIface :: TypeIface
 emptyTypeIface = TypeIface {sType = ""}
 
 fromTypePort :: TypePort -> Port
-fromTypePort (iTypes, oType) = [
-        ("first", "in",  "bool"),
-        ("nex", "in",  "bool"),
-        ("data", "out",  oBusType),
-        ("ack", "out",  "bool")
-        ] ++ (concatMap (\ (t, i) -> [
-                ("f" ++ show i, "out","bool"),
-                ("n" ++ show i, "out","bool"),
-                ("d" ++ show i, "in",sType t),
-                ("a" ++ show i, "in","bool")
+fromTypePort (iTypes, oType) = ("data", oBusType) : (concatMap (\ (t, i) -> [
+                ("d" ++ show i, sType t)
                 ]) $ zip iType [0,1..]) where
                 oBusType = (sType.getTypeIface') oType
                 iType = map (getTypeIface') iTypes
@@ -60,14 +52,11 @@ calcEntityTypePort gr n@(i, ce) = case ce of
         (CEIf t) -> (map (calcEntityType gr.(\ (_, x) -> (x, fromJust $ lab gr x))) $ sortBy (\ (r1, _) (r2, _) -> r1 `compare` r2) $ (\ (ins, _, _, _) -> ins) $ context gr i, t)
         --_ -> ([], )
 
-splitParamPort :: Gr CalcEntity EdgeRole -> LNode CalcEntity -> Port -> Port
-splitParamPort gr ln@(n, _) port = (concatMap (\ i -> map (\ (fr, tp, to) -> (fr ++ show i, tp, to)) $ take 4 port) [0..(length $ out gr n) - 1]) ++ (drop 4 port)
-
 calcEntityPort :: Gr CalcEntity EdgeRole -> LNode CalcEntity -> Port
-calcEntityPort gr n = (if isParamLN gr n then splitParamPort gr n else id) $ fromTypePort $ calcEntityTypePort gr n
+calcEntityPort gr n = fromTypePort $ calcEntityTypePort gr n
 
 altCount :: Gr CalcEntity EdgeRole -> LNode CalcEntity -> Int
-altCount gr n = ((length $ calcEntityPort gr n) `div` 8) - 1
+altCount gr n = ((length $ calcEntityPort gr n) `div` 2) - 1
 
 getEdgePortMap :: Gr CalcEntity EdgeRole -> LEdge EdgeRole -> PortMap
 getEdgePortMap gr e@(i, j, role) = ((i, cei), (j, cej), case (cej, role) of
@@ -84,9 +73,9 @@ getEdgePortMap gr e@(i, j, role) = ((i, cei), (j, cej), case (cej, role) of
         ) where
                 cei = fromJust $ lab gr i
                 cej = fromJust $ lab gr j
-                oPort = map (\ (x, _, y) -> (x, y)) $ take 4  $ drop (4 * (fromJust $ elemIndex e $ out gr i)) (calcEntityPort gr (i, cei))
-                argPort arg = map (\ (x, _, _) -> x) $ take 4 $ drop (4 * (arg + 1)) (calcEntityPort gr (j, cej))
-                cond = map (\ (x, _, _) -> x) $ take 4 $ drop 4 (calcEntityPort gr (j, cej))
-                def = map (\ (x, _, _) -> x) $ reverse $ take 4 $ reverse (calcEntityPort gr (j, cej))
-                altHead num = map (\ (x, _, _) -> x) $ take 4 $ drop (4 * (num + 2)) (calcEntityPort gr (j, cej))
-                alt num = map (\ (x, _, _) -> x) $ take 4 $ drop (4 * (num + altCount gr (j, cej) + 2)) (calcEntityPort gr (j, cej))
+                oPort = take 1  $ drop (fromJust $ elemIndex e $ out gr i) (calcEntityPort gr (i, cei))
+                argPort arg = map fst $ take 1 $ drop (1 * (arg + 1)) (calcEntityPort gr (j, cej))
+                cond = map fst $ take 1 $ drop 1 (calcEntityPort gr (j, cej))
+                def = map fst $ reverse $ take 1 $ reverse (calcEntityPort gr (j, cej))
+                altHead num = map fst $ take 1 $ drop (num + 2) (calcEntityPort gr (j, cej))
+                alt num = map fst $ take 1 $ drop (num + altCount gr (j, cej) + 2) (calcEntityPort gr (j, cej))

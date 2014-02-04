@@ -8,7 +8,7 @@ getTypeIface' :: Type -> TypeIface
 getTypeIface' t = case (showSDoc $ pprType t) of
         "GHC.Prim.Int#" -> TypeIface {sType = "int"}
         "GHC.Types.Int" -> TypeIface {sType = "int"}
-        --"GHC.Num.Integer" -> TypeIface {sArity = 15, sType = "signed"}
+        --"GHC.Num.Integer" -> TypeIface {sType = "int"}
         "GHC.Prim.Char#" -> TypeIface {sType = "char"}
         "GHC.Types.Char" -> TypeIface {sType = "char"}
         "GHC.Types.Bool" -> TypeIface {sType = "bool"}

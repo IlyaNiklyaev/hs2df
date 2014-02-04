@@ -4,7 +4,7 @@ import Type
 import Data.Graph.Inductive
 import Core.CoreGraph
 
-type Port = [(String, String, String)]
+type Port = [(String, String)]
 
 data TypeIface = TypeIface {sType :: String}
 
