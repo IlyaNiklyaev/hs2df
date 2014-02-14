@@ -8,7 +8,7 @@ import Core.CoreGraph
 
 funcEntity :: Gr CalcEntity EdgeRole -> LNode CalcEntity -> String -> String
 funcEntity gr ln@(_, ce) name = unlines [
-        "__kernel void " ++ name ++ "(" ++ (intercalate ", " $ map (\ (n, t) -> "__global *" ++ t ++ " " ++ n) $ calcEntityPort gr ln) ++ ")",
+        "__kernel void " ++ name ++ "(" ++ (intercalate ", " $ map (\ (n, t) -> "__global " ++ t ++ " *" ++ n) $ calcEntityPort gr ln) ++ ")",
         "{",
         "       " ++ getFuncBody var,
         "}"

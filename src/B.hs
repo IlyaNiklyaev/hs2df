@@ -1,7 +1,7 @@
 module B where
 
-main :: Bool -> Int -> Int
-main c x = if c then x + 20 else x - 20
+main :: Bool -> Double -> Double
+main c x = if c then x + 20 else x / 20
 
 --cb :: Float
 --cb = 0.0083

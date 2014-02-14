@@ -73,7 +73,8 @@ getEdgePortMap gr e@(i, j, role) = ((i, cei), (j, cej), case (cej, role) of
         ) where
                 cei = fromJust $ lab gr i
                 cej = fromJust $ lab gr j
-                oPort = take 1  $ drop (fromJust $ elemIndex e $ out gr i) (calcEntityPort gr (i, cei))
+                --oPort = take 1  $ drop (fromJust $ elemIndex e $ out gr i) (calcEntityPort gr (i, cei))
+                oPort = take 1 $ (calcEntityPort gr (i, cei))
                 argPort arg = map fst $ take 1 $ drop (1 * (arg + 1)) (calcEntityPort gr (j, cej))
                 cond = map fst $ take 1 $ drop 1 (calcEntityPort gr (j, cej))
                 def = map fst $ reverse $ take 1 $ reverse (calcEntityPort gr (j, cej))
