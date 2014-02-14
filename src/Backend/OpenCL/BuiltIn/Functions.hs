@@ -23,3 +23,10 @@ getFuncBody v = case getVarName v of
         "==" -> "*data = *d0 == *d1 ? true : false"
         "/=" -> "*data = *d0 != *d1 ? true : false"
         _ -> ""
+
+getMatchBody :: Var -> String
+getMatchBody v = case getVarName v of
+        "I#" -> "*data = *d0;"
+        "F#" -> "*data = *d0;"
+        "D#" -> "*data = *d0;"
+        _ -> ""

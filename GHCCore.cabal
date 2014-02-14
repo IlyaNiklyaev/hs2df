@@ -37,5 +37,6 @@ executable GHCCore
                    Tools,
                    Backend.OpenCL.OpenCL,
                    Backend.OpenCL.Kernel,
-                   Backend.OpenCL.Host
+                   Backend.OpenCL.Host,
+                   Backend.OpenCL.Matching
 

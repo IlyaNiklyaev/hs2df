@@ -23,7 +23,7 @@ calcEntityName gr n@(i, ce) = case ce of
         (CELit l) -> "lit" ++ show i
         (CEVar v) -> if isParamLN gr n then "var" ++ (getVarName v) else "func" ++ show i
         (CEExpr v) -> if isParamLN gr n then "var" ++ (getVarName v) else "func" ++ show i
-        (CEPM v p) -> "pmatch[" ++ show p ++ "]" ++ show i
+        (CEPM v p) -> "pmatch_" ++ show p ++ "_" ++ show i
         (CEIf _) -> "if" ++ show i
         _ -> "other" ++ show i
 

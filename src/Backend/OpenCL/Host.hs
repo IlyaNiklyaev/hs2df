@@ -14,7 +14,6 @@ import Tools
 import Data.Maybe (fromJust)
 
 edgePortName :: Gr CalcEntity EdgeRole -> LNode CalcEntity -> LNode CalcEntity -> String -> String -> String
---edgePortName gr from to sFrom sTo = calcEntityName gr from ++ "_" ++ sFrom ++ "_" ++ calcEntityName gr to ++ "_" ++ sTo
 edgePortName gr from to sFrom sTo = calcEntityName gr from
 
 kernelArgIndex :: Gr CalcEntity EdgeRole -> LNode CalcEntity -> String -> Int
@@ -130,7 +129,6 @@ genHostBody gr = ("HaskellCL.cpp", unlines [
                 ]) params,
         "\t" ++ busType ++ " out;\n",
         --unlines $ concatMap (\ (from, to, pm) -> map (\(f, t, tp) -> "\tcl_mem " ++ edgePortName gr from to f t ++ "Buffer  = clCreateBuffer(context, CL_MEM_WRITE_ONLY , sizeof(" ++ tp ++ "), NULL, NULL);") pm) nodeMap,
-        --"\tcl_mem outputBuffer = clCreateBuffer(context, CL_MEM_WRITE_ONLY , sizeof(" ++ busType ++ "), NULL, NULL);\n",
         concatMap (\ln -> let
                                 tp = sType $ calcEntityTypeIface gr ln
                                 nm = calcEntityName gr ln

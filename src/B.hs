@@ -1,7 +1,21 @@
 module B where
 
-main :: Bool -> Double -> Double
-main c x = if c then x + 20 else x / 20
+test1 :: Double -> (Double,Double)
+test1 x = (x, x + 1)
+
+test2 :: Double -> Double -> Double
+test2 x y = (x + y) / 100
+
+test3 :: (Double -> Double -> Double) -> Bool -> Double -> Double
+test3 f b t = if b then f 10 t else f 20 t
+
+test4 :: (Double,Double) -> Bool
+test4 (0,_) = False
+test4 (_,0) = False;
+test4 _ = True;
+
+main :: Bool -> Double -> Bool
+main c x = if test4 (x,1) then c else False
 
 --cb :: Float
 --cb = 0.0083
