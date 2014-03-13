@@ -25,9 +25,8 @@ getVHDLFile gr n@(i, ce) = case (ce, context gr i) of
 genTopEntity :: Gr CalcEntity EdgeRole -> (String, String)
 genTopEntity gr = ("device", topEntity "device" gr)
 
-genVHDL :: Gr CalcEntity EdgeRole -> IO ()
-genVHDL gr = do
-        let dir = "G:\\hsOut\\"
+genVHDL :: Gr CalcEntity EdgeRole -> String -> IO ()
+genVHDL gr dir = do
         createDirectoryIfMissing True dir
         --dcont <- getDirectoryContents dir
         --files <- filterM (\ fname -> doesFileExist $ dir ++ fname) dcont

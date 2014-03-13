@@ -8,9 +8,8 @@ import System.Directory
 import Backend.OpenCL.Host
 import Backend.OpenCL.Kernel
 
-genOpenCL :: Gr CalcEntity EdgeRole -> IO ()
-genOpenCL gr = do
-        let dir = "G:\\hsOut\\"
+genOpenCL :: Gr CalcEntity EdgeRole -> String -> IO ()
+genOpenCL gr dir = do
         createDirectoryIfMissing True dir
         forM_ [genHostBody gr, genHostHeader gr, genKernels gr] (\ (name, content) -> do
         h <- openFile (dir ++ name) WriteMode
