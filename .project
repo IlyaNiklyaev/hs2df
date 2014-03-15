@@ -3,7 +3,6 @@
 	<name>GHCCore</name>
 	<comment></comment>
 	<projects>
-		<project>VHDLGen</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

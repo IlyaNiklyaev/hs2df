@@ -8,6 +8,7 @@ options :: [OptDescr Argument]
 options = [
                 Option ['t'] ["dumpTree"] (NoArg $ Dump "tree") "Dump Core AST",
                 Option ['b'] ["dumpBinds"] (NoArg $ Dump "binds") "Dump local functions",
+                Option ['d'] ["dumpTypes"] (NoArg $ Dump "types") "Dump local types",
                 Option ['i','I'] ["input"] (ReqArg Input "FILE") "Haskell source FILE",
                 Option ['o','O'] ["output"] (ReqArg Output "DIR") "Output directory",
                 Option ['v'] ["vhdl"] (NoArg $ Backend "vhdl") "Generate VHDL code",

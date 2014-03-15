@@ -1,5 +1,7 @@
 module B where
 
+data TestData = First Int | Second Bool
+
 test1 :: Double -> (Double,Double)
 test1 x = (x, x + 1)
 

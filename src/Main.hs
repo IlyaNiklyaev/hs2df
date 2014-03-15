@@ -18,6 +18,8 @@ import Backend.OpenCL.OpenCL
 import Control.Monad (when)
 import System.Console.GetOpt
 import Options
+import Outputable (showSDoc, ppr)
+import HscTypes (typeEnvTyCons)
 
 modifyAST :: Tree (CoreNode CoreBndr) -> Tree (CoreNode CoreBndr)
 modifyAST = substLets.elimForAlls.nameApps.foldLambdas.foldApps
@@ -39,13 +41,14 @@ main = do
    args <- getArgs
    let (opts,_,_) = getOpt Permute options args
    if (isValidOptions opts) then do
-        res <- defaultErrorHandler defaultLogAction $ runGhc (Just libdir) $ do
+        (program,types) <- defaultErrorHandler defaultLogAction $ runGhc (Just libdir) $ do
                 dflags <- getSessionDynFlags
                 _ <- setSessionDynFlags $ setDynFlags [] $ unsetDynFlags [] $ dflags {optLevel = 1}
                 c <- compileToCoreSimplified $ sourceFile opts
-                return $ cm_binds c
-        let phase1 = map (modifyAST.toTree.CNBind) res
+                return $ (cm_binds c,typeEnvTyCons $ cm_types c)
+        let phase1 = map (modifyAST.toTree.CNBind) program
         when ("tree" `elem` (activeDumps opts)) $ putStrLn $ drawForest $ map (fmap show) phase1
+        when ("types" `elem` (activeDumps opts)) $ putStrLn $ showSDoc $ ppr types
         let intBinds = concatMap extractBinds phase1
         let phase2 = intBinds ++ map (bindToAST.splitCaseAlts.deleteCaseBinds) phase1
         let phase3 = modifyGraph.treeToGraph.(substApps phase2).fromJust $ lookupCoreAST phase2 "main"
