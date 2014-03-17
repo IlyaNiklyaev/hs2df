@@ -2,6 +2,7 @@ module Backend.OpenCL.If where
 
 import Data.Graph.Inductive
 import Core.CoreGraph
+import Backend.Common.Tools
 import Backend.OpenCL.Tools
 import Data.List (intercalate)
 

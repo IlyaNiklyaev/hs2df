@@ -5,12 +5,12 @@ import Core.CoreGraph
 import Control.Monad
 import System.IO
 import System.Directory
+import Backend.Common.Tools
 import Backend.VHDL.Literal
 import Backend.VHDL.Function
 import Backend.VHDL.If
 import Backend.VHDL.TopEntity
 import Backend.VHDL.Param
-import Backend.VHDL.Tools
 
 getVHDLFile :: Gr CalcEntity EdgeRole -> LNode CalcEntity -> (String, String)
 getVHDLFile gr n@(i, ce) = case (ce, context gr i) of
@@ -28,9 +28,6 @@ genTopEntity gr = ("device", topEntity "device" gr)
 genVHDL :: Gr CalcEntity EdgeRole -> String -> IO ()
 genVHDL gr dir = do
         createDirectoryIfMissing True dir
-        --dcont <- getDirectoryContents dir
-        --files <- filterM (\ fname -> doesFileExist $ dir ++ fname) dcont
-        --forM_ files removeFile
         forM_ (genTopEntity gr : (map (getVHDLFile gr) $ labNodes gr)) (\ (name, content) -> do
         h <- openFile (dir ++ name ++ ".vhdl") WriteMode
         hPutStr h content

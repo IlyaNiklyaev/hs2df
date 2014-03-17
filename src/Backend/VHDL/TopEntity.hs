@@ -2,13 +2,10 @@ module Backend.VHDL.TopEntity where
 
 import Data.Graph.Inductive
 import Core.CoreGraph
-import Backend.VHDL.BuiltIn.Types
 import Data.Graph.Analysis.Algorithms.Directed
 import Data.List
+import Backend.Common.Tools
 import Backend.VHDL.Types
-import Backend.VHDL.Function
-import Backend.VHDL.Literal
-import Backend.VHDL.Param
 import Backend.VHDL.Tools
 import Tools
 
@@ -55,7 +52,7 @@ topEntity name gr = unlines [
                 "        data => data",
                 concat $ concatMap (\ (from, to, pm) -> map (\(f, t, _) -> ",\n        " ++ t ++ " => " ++ edgePortName gr from to f t) pm) $ filter (\ (_,t,_) -> t == top) nodeMap,
                 "\n        );"],
-        concatMap (\ (node@(i, ce), j) -> concat [
+        concatMap (\ (node@(i, _), j) -> concat [
                 "    inst" ++ show i ++ ": " ++ (calcEntityName gr node) ++ " PORT MAP (\n",
                 "        f0 => f" ++ show j ++ ",\n",
                 "        n0 => n" ++ show j ++ ",\n",
@@ -64,7 +61,7 @@ topEntity name gr = unlines [
                 concat $ concatMap (\ (from, to, pm) -> map (\(f, t, _) -> ",\n        " ++ f ++ " => " ++ edgePortName gr from to f t) pm) $ filter (\ (f,_,_) -> f == node) nodeMap,
                 "\n        );\n"]
                 ) $ zip params [0,1..],
-        concatMap (\ node@(i, ce) -> concat [
+        concatMap (\ node@(i, _) -> concat [
                 "    inst" ++ show i ++ ": " ++ (calcEntityName gr node) ++ " PORT MAP (",
                 safeInit $ concat $ concat [
                         concatMap (\ (from, to, pm) -> map (\(f, t, _) -> "\n        " ++ f ++ " => " ++ edgePortName gr from to f t ++ ",") pm) $ filter (\ (f,_,_) -> f == node) nodeMap,

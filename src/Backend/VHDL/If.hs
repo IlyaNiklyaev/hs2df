@@ -1,16 +1,13 @@
 module Backend.VHDL.If where
 
-import Var
 import Data.Graph.Inductive
 import Core.CoreGraph
-import Backend.VHDL.BuiltIn.Types
-import Backend.VHDL.Types
+import Backend.Common.Tools
 import Backend.VHDL.Tools
-import Tools
 import Data.List (intercalate)
 
 ifEntity :: Gr CalcEntity EdgeRole -> String -> LNode CalcEntity -> String
-ifEntity gr name n@(i, ce) = unlines [
+ifEntity gr name n = unlines [
         "library IEEE;",
         "use IEEE.std_logic_1164.all;",
         "use IEEE.numeric_std.all;",

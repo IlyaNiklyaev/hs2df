@@ -2,15 +2,11 @@ module Backend.OpenCL.Host where
 
 import Data.Graph.Inductive
 import Core.CoreGraph
-import Backend.OpenCL.BuiltIn.Types
 import Data.Graph.Analysis.Algorithms.Directed
 import Data.List
 import Backend.OpenCL.Types
-import Backend.OpenCL.Function
-import Backend.OpenCL.Literal
-import Backend.OpenCL.Param
+import Backend.Common.Tools
 import Backend.OpenCL.Tools
-import Tools
 import Data.Maybe (fromJust)
 
 edgePortName :: Gr CalcEntity EdgeRole -> LNode CalcEntity -> LNode CalcEntity -> String -> String -> String
@@ -175,4 +171,3 @@ genHostBody gr = ("HaskellCL.cpp", unlines [
                 params = filter (isParamLN gr) $ labNodes gr
                 top = head $ leavesOf gr
                 nodeMap = map (getEdgePortMap gr) $ labEdges gr
-                internals = (labNodes gr) \\ (top:params)
