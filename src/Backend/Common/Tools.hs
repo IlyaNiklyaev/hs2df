@@ -8,6 +8,7 @@ import Data.Maybe (fromJust)
 import Core.CoreGraph
 import Backend.Common.Types
 import Core.CoreTools
+import Core.CoreTypes
 import Data.List (sortBy)
 
 isParamLN ::  Gr CalcEntity EdgeRole -> LNode CalcEntity -> Bool
@@ -40,5 +41,22 @@ calcEntityTypePort gr n@(i, ce) = case ce of
 altCount :: Gr CalcEntity EdgeRole -> LNode CalcEntity -> Int
 altCount gr n = ((length $ fst $ calcEntityTypePort gr n) `div` 2) - 1
 
-getEdgeType :: Gr CalcEntity EdgeRole -> LEdge EdgeRole -> Type
-getEdgeType gr (i, _, _) = snd $ calcEntityTypePort gr (i, fromJust $ lab gr i)
+primitivize :: TypePort -> TypePortPrimitive
+primitivize (i,o) = (concatMap (\ (num,t) -> primitivizeType num t) $ zip [0,1..] i,primitivizeType 0 o)
+
+getEdgePortMap' :: Gr CalcEntity EdgeRole -> LEdge EdgeRole -> PortMap'
+getEdgePortMap' gr (i, j, role) = ((i, cei), (j, cej), case (cej, role) of
+        (_, Arg arg) -> zip (repeat arg) $ primitivizeType arg oPort
+        (_, Cond) -> zip (repeat 0) $ primitivizeType 0 oPort
+        (_, AltHead num) -> zip (repeat (num * 2 + 1)) $ primitivizeType (num * 2 + 1) oPort
+        (_, Alt num) -> zip (repeat (num * 2 + 2)) $ primitivizeType (num * 2 + 2) oPort
+        (_, Default) -> zip (repeat (edgeCount - 1)) $ primitivizeType (edgeCount - 1) oPort
+        (CEVar _, _) -> []
+        (CEExpr _, _) -> []
+        (CEPM v p, _) -> []
+        (_, _) -> []
+        ) where
+                cei = fromJust $ lab gr i
+                cej = fromJust $ lab gr j
+                (_,oPort) = (calcEntityTypePort gr (i, cei))
+                edgeCount = length $ fst $ (calcEntityTypePort gr (j, cej))
