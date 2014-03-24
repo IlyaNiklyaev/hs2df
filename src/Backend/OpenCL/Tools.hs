@@ -3,6 +3,7 @@ module Backend.OpenCL.Tools where
 import Data.Graph.Inductive
 import Data.Maybe (fromJust)
 import Core.CoreGraph
+import Core.CoreTypes
 import Backend.Common.Types
 import Backend.Common.Tools
 import Backend.OpenCL.Types
@@ -24,8 +25,8 @@ fromTypePort (iTypes, oType) = ("data", oBusType) : (concatMap (\ (t, i) -> [
 calcEntityPort :: Gr CalcEntity EdgeRole -> LNode CalcEntity -> Port
 calcEntityPort gr n = fromTypePort $ calcEntityTypePort gr n
 
-getEdgePortMap :: Gr CalcEntity EdgeRole -> LEdge EdgeRole -> PortMap
-getEdgePortMap gr (i, j, role) = ((i, cei), (j, cej), case (cej, role) of
+getEdgePortMap2 :: Gr CalcEntity EdgeRole -> LEdge EdgeRole -> PortMap
+getEdgePortMap2 gr (i, j, role) = ((i, cei), (j, cej), case (cej, role) of
         (CELit _, _) -> []
         (_, Arg arg) -> map (\ ((x,y),z) -> (x,z,y)) $ zip oPort $ argPort arg
         (_, Cond) -> map (\ ((x,y),z) -> (x,z,y)) $ zip oPort $ cond
@@ -45,3 +46,10 @@ getEdgePortMap gr (i, j, role) = ((i, cei), (j, cej), case (cej, role) of
                 def = map fst $ reverse $ take 1 $ reverse (calcEntityPort gr (j, cej))
                 altHead num = map fst $ take 1 $ drop (num + 2) (calcEntityPort gr (j, cej))
                 alt num = map fst $ take 1 $ drop (num + altCount gr (j, cej) + 2) (calcEntityPort gr (j, cej))
+
+getChannelType :: Channel -> String
+getChannelType (Tag _) = "int"
+getChannelType (Typed _ t) = (sType.getTypeIface') t
+
+getEdgePortMap :: Gr CalcEntity EdgeRole -> LEdge EdgeRole -> PortMap
+getEdgePortMap gr e = (i,j,portMap) where (i,j,portMap') = getEdgePortMap' gr e; portMap = map (\ (chId,ch) -> ("data","d" ++ show chId,getChannelType ch)) portMap'

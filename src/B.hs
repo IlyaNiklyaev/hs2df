@@ -2,22 +2,15 @@ module B where
 
 data TestData = First Int | Second Bool
 
-test1 :: Double -> (Double,Double)
-test1 x = (x, x + 1)
+gen :: Int -> TestData
+gen 0 = Second False
+gen 1 = Second True
+gen n = First n
 
-test2 :: Double -> Double -> Double
-test2 x y = (x + y) / 100
-
-test3 :: (Double -> Double -> Double) -> Bool -> Double -> Double
-test3 f b t = if b then f 10 t else f 20 t
-
-test4 :: (Double,Double) -> Bool
-test4 (0,_) = False
-test4 (_,0) = False;
-test4 _ = True;
-
-main :: Bool -> Double -> Bool
-main c x = if test4 (x,1) then c else False
+main :: Int -> Bool
+main x = case gen x of
+        First _ -> True
+        Second _ -> False
 
 --cb :: Float
 --cb = 0.0083

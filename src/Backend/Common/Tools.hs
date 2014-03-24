@@ -46,6 +46,7 @@ primitivize (i,o) = (concatMap (\ (num,t) -> primitivizeType num t) $ zip [0,1..
 
 getEdgePortMap' :: Gr CalcEntity EdgeRole -> LEdge EdgeRole -> PortMap'
 getEdgePortMap' gr (i, j, role) = ((i, cei), (j, cej), case (cej, role) of
+        (CELit _, _) -> []
         (_, Arg arg) -> zip (repeat arg) $ primitivizeType arg oPort
         (_, Cond) -> zip (repeat 0) $ primitivizeType 0 oPort
         (_, AltHead num) -> zip (repeat (num * 2 + 1)) $ primitivizeType (num * 2 + 1) oPort
