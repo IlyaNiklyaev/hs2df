@@ -7,8 +7,8 @@ import Core.CoreTypes
 
 type TypePort = ([Type], Type)
 
-type TypePortPrimitive = ([Channel], [Channel])
+type TypePortPrimitive = ([[Channel]], [Channel])
 
 type PortMap = (LNode CalcEntity, LNode CalcEntity, [(String, String, String)])
 
-type PortMap' = (LNode CalcEntity, LNode CalcEntity, [(Int, Channel)])
+type PortMap' = (LNode CalcEntity, LNode CalcEntity, [(Channel, Channel)])

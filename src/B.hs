@@ -1,16 +1,16 @@
 module B where
 
-data TestData = First Int | Second Bool
+data A = F Int | S Float Int
 
-gen :: Int -> TestData
-gen 0 = Second False
-gen 1 = Second True
-gen n = First n
+value :: A -> Int
+value (F n) = n
+value (S _ n) = n
 
-main :: Int -> Bool
-main x = case gen x of
-        First _ -> True
-        Second _ -> False
+empty :: A
+empty = F 0
+
+main :: A -> Int
+main x = case x of S 0.1 f -> f; F n -> n; S _ _ -> 0
 
 --cb :: Float
 --cb = 0.0083

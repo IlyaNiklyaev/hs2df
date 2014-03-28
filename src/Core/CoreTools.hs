@@ -7,6 +7,10 @@ import Type
 import Outputable (showSDoc)
 import Name (nameOccName)
 import OccName (occNameString)
+import DataCon
+import Id (isDataConId_maybe)
+import TyCon (tyConDataCons)
+import Data.List (find)
 
 instance Show (Bind m) where
         show (NonRec _ _) = "NonRec"

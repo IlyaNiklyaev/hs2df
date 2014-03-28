@@ -19,7 +19,8 @@ executable GHCCore
                    ghc-prim,
                    integer-gmp,
                    Graphalyze,
-                   directory
+                   directory,
+                   graphviz
   hs-source-dirs:  src
   ghc-options:     -Wall -rtsopts
   main-is:         Main.hs

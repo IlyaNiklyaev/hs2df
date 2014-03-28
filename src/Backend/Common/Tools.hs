@@ -10,11 +10,12 @@ import Backend.Common.Types
 import Core.CoreTools
 import Core.CoreTypes
 import Data.List (sortBy)
+import Id (isDataConId_maybe)
 
 isParamLN ::  Gr CalcEntity EdgeRole -> LNode CalcEntity -> Bool
 isParamLN gr (i, ce) = case (ce, context gr i) of
-        (CEVar v, ([], _, _, _)) -> not $ isAlgType $ varType v
-        (CEExpr v, ([], _, _, _)) -> not $ isAlgType $ varType v
+        (CEVar v, ([], _, _, _)) -> case isDataConId_maybe v of Nothing -> True; Just _ -> False
+        (CEExpr v, ([], _, _, _)) -> case isDataConId_maybe v of Nothing -> True; Just _ -> False
         _ -> False
 
 calcEntityName :: Gr CalcEntity EdgeRole -> LNode CalcEntity -> String
@@ -39,19 +40,20 @@ calcEntityTypePort gr n@(i, ce) = case ce of
         --_ -> ([], )
 
 altCount :: Gr CalcEntity EdgeRole -> LNode CalcEntity -> Int
-altCount gr n = ((length $ fst $ calcEntityTypePort gr n) `div` 2) - 1
+altCount gr n = if odd argCnt then argCnt `div` 2 else (argCnt `div` 2) - 1 
+        where argCnt = (length $ fst $ calcEntityTypePort gr n)
 
 primitivize :: TypePort -> TypePortPrimitive
-primitivize (i,o) = (concatMap (\ (num,t) -> primitivizeType num t) $ zip [0,1..] i,primitivizeType 0 o)
+primitivize (i,o) = (map (\ (num,t) -> primitivizeType ("d" ++ show num) t) $ zip [0,1..] i,primitivizeType "data" o)
 
 getEdgePortMap' :: Gr CalcEntity EdgeRole -> LEdge EdgeRole -> PortMap'
 getEdgePortMap' gr (i, j, role) = ((i, cei), (j, cej), case (cej, role) of
         (CELit _, _) -> []
-        (_, Arg arg) -> zip (repeat arg) $ primitivizeType arg oPort
-        (_, Cond) -> zip (repeat 0) $ primitivizeType 0 oPort
-        (_, AltHead num) -> zip (repeat (num * 2 + 1)) $ primitivizeType (num * 2 + 1) oPort
-        (_, Alt num) -> zip (repeat (num * 2 + 2)) $ primitivizeType (num * 2 + 2) oPort
-        (_, Default) -> zip (repeat (edgeCount - 1)) $ primitivizeType (edgeCount - 1) oPort
+        (_, Arg arg) -> zip iPort $ oPort ("d" ++ show arg)
+        (_, Cond) -> zip iPort $ oPort "d0"
+        (_, AltHead num) -> zip iPort $ oPort $ "d" ++ show (num + 1)
+        (_, Alt num) -> zip iPort $ oPort $ "d" ++ show (aCount + num + 1)
+        (_, Default) -> zip iPort $ oPort $ "d" ++ show defAlt
         (CEVar _, _) -> []
         (CEExpr _, _) -> []
         (CEPM v p, _) -> []
@@ -59,5 +61,8 @@ getEdgePortMap' gr (i, j, role) = ((i, cei), (j, cej), case (cej, role) of
         ) where
                 cei = fromJust $ lab gr i
                 cej = fromJust $ lab gr j
-                (_,oPort) = (calcEntityTypePort gr (i, cei))
-                edgeCount = length $ fst $ (calcEntityTypePort gr (j, cej))
+                (_,oPort') = (calcEntityTypePort gr (i, cei))
+                oPort prefix = primitivizeType prefix oPort'
+                iPort = oPort "data"
+                aCount = altCount gr (j,cej)
+                defAlt = (aCount * 2) + 1

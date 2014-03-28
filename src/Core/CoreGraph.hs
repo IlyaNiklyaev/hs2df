@@ -44,7 +44,7 @@ instance Ord CalcEntity where
         
 instance Show CalcEntity where
         show (CEVar v) = "Name " ++ getVarName v ++ ": " ++ (showSDoc $ pprType $ varType v)
-        show (CEPM v i) = "Patter matching [" ++ show i ++ "]: " ++ getVarName v ++ ": " ++ (showSDoc $ pprType $ varType v)
+        show (CEPM v i) = "Pattern matching [" ++ show i ++ "]: " ++ getVarName v ++ ": " ++ (showSDoc $ pprType $ varType v)
         show (CEExpr v) = "Expr " ++ getVarName v ++ ": " ++ (showSDoc $ pprType $ varType v)
         show (CELit l) = showLit l
         show (CEIf t) = "If"
