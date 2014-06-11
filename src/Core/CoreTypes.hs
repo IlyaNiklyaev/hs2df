@@ -17,3 +17,8 @@ primitivizeType :: String -> Type -> [Channel]
 primitivizeType parentId t = if not $ isAlgType t then [Typed parentId t] else case tyConAppTyCon_maybe t of
                         Just tc -> if 1 == length (tyConDataCons tc) then (getDataConIface parentId $ head $ tyConDataCons tc) else (Tag $ parentId ++ "tag"):(concatMap (\ (i,dc) -> getDataConIface (parentId ++ show i) dc) $ zip [0,1..] $ tyConDataCons tc) 
                         Nothing -> [Typed parentId t]
+
+primitivizeType' :: String -> Type -> [[Channel]]
+primitivizeType' parentId t = if not $ isAlgType t then [[Typed parentId t]] else case tyConAppTyCon_maybe t of
+                        Just tc -> if 1 == length (tyConDataCons tc) then [getDataConIface parentId $ head $ tyConDataCons tc] else [Tag $ parentId ++ "tag"]:(map (\ (i,dc) -> getDataConIface (parentId ++ show i) dc) $ zip [0,1..] $ tyConDataCons tc) 
+                        Nothing -> [[Typed parentId t]]

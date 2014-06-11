@@ -14,15 +14,15 @@ import Id (isDataConId_maybe)
 
 isParamLN ::  Gr CalcEntity EdgeRole -> LNode CalcEntity -> Bool
 isParamLN gr (i, ce) = case (ce, context gr i) of
-        (CEVar v, ([], _, _, _)) -> case isDataConId_maybe v of Nothing -> True; Just _ -> False
+        --(CEVar v, ([], _, _, _)) -> case isDataConId_maybe v of Nothing -> True; Just _ -> False
         (CEExpr v, ([], _, _, _)) -> case isDataConId_maybe v of Nothing -> True; Just _ -> False
         _ -> False
 
 calcEntityName :: Gr CalcEntity EdgeRole -> LNode CalcEntity -> String
 calcEntityName gr n@(i, ce) = case ce of
         (CELit _) -> "lit" ++ show i
-        (CEVar v) -> if isParamLN gr n then "var" ++ (getVarName v) else "func" ++ show i
-        (CEExpr v) -> if isParamLN gr n then "var" ++ (getVarName v) else "func" ++ show i
+        (CEVar v) -> if isParamLN gr n then "param" ++ (getVarName v) else "func" ++ show i
+        (CEExpr v) -> if isParamLN gr n then "param" ++ (getVarName v) else "func" ++ show i
         (CEPM _ p) -> "pmatch_" ++ show p ++ "_" ++ show i
         (CEIf _) -> "if" ++ show i
         _ -> "other" ++ show i
@@ -33,8 +33,10 @@ calcEntityType gr = snd.calcEntityTypePort gr
 calcEntityTypePort :: Gr CalcEntity EdgeRole -> LNode CalcEntity -> TypePort
 calcEntityTypePort gr n@(i, ce) = case ce of
         (CELit l) -> ([], literalType l)
-        (CEVar v) -> if isParamLN gr n then ([varType v], varType v) else ([], varType v)
-        (CEExpr v) -> if isParamLN gr n then ([res], res) else (filter (not.isDictLikeTy) args, res) where (args, res) = splitFunTys $ varType v
+        --(CEVar v) -> if isParamLN gr n then ([varType v], varType v) else ([], varType v)
+        (CEVar v) -> splitFunTys $ varType v
+        --(CEExpr v) -> if isParamLN gr n then ([res], res) else (filter (not.isDictLikeTy) args, res) where (args, res) = splitFunTys $ varType v
+        (CEExpr v) -> splitFunTys $ varType v
         (CEPM v _) -> ([res], head $ filter (not.isDictLikeTy) args) where (args, res) = splitFunTys $ varType v
         (CEIf t) -> (map (calcEntityType gr.(\ (_, x) -> (x, fromJust $ lab gr x))) $ sortBy (\ (r1, _) (r2, _) -> r1 `compare` r2) $ (\ (ins, _, _, _) -> ins) $ context gr i, t)
         --_ -> ([], )
