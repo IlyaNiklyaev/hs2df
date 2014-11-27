@@ -69,37 +69,22 @@ mergeDupNodes :: Gr CalcEntity EdgeRole -> Gr CalcEntity EdgeRole
 mergeDupNodes gr = delNodes (map fst $ concatMap tail dups) $ insEdges (concatMap (\ (x:xs) -> [ (fst x, o, er) | (er, o) <- concatMap (\ (n, _) -> (\ (_, _, _, adj) -> adj) $ context gr n) xs]) dups) gr where
         dups = filter (\ x -> length x > 1) $ groupBy (\ (_, n1) (_, n2) -> n1 == n2) $ sortBy (\ (_, n1) (_, n2) -> n1 `compare` n2) $ filter isVarNode $ rootsOf gr
 
-getAltNumber :: (Eq m, Variable m) => Tree (CoreNode m) -> [Tree (CoreNode m)] -> Maybe EdgeRole
-getAltNumber node alts = case findIndex (== node) alts of
-        Just i -> if i `mod` 2 == 0 then Just (AltHead (i `div` 2)) else Just (Alt (i `div` 2))
-        Nothing -> Nothing
+getEdgeName :: (Eq m, Variable m) => Int -> Tree (CoreNode m) -> Tree (CoreNode m) -> EdgeRole
+getEdgeName ind (Node (CNExpr (Case _ _ _ _)) (_:(Node (CNExpr (Var _)) _):_)) _ = case ind of
+        0 -> Cond
+        1 -> Default
+        _ -> let i = ind - 2 in if i `mod` 2 == 0 then AltHead (i `div` 2) else Alt (i `div` 2)
+        
+getEdgeName ind (Node (CNExpr (Case _ _ _ _)) _) _ = if ind == 0 then Cond else let i = ind - 1 in if i `mod` 2 == 0 then AltHead (i `div` 2) else Alt (i `div` 2)
 
-getEdgeName :: (Eq m, Variable m) => Tree (CoreNode m) -> Tree (CoreNode m) -> EdgeRole
-getEdgeName (Node (CNExpr (Case _ _ _ _)) (cond:def@(Node (CNExpr (Var _)) _):alts)) node
-        | def == node = Default
-        | cond == node = Cond
-        | otherwise = case getAltNumber node alts of
-                Just er -> er
-                Nothing -> Arg 0
-getEdgeName (Node (CNExpr (Case _ _ _ _)) (cond:alts)) node
-        | cond == node = Cond
-        | otherwise = case getAltNumber node alts of
-                Just er -> er
-                Nothing -> Arg 0
-getEdgeName (Node (CNExpr (Var _)) args) node = case findIndex (== node) args of
-                Just i ->  Arg i
-                Nothing -> Arg 0
-getEdgeName (Node (CNName _) args) node = case findIndex (== node) args of
-                Just i ->  Arg i
-                Nothing -> Arg 0
-getEdgeName (Node _ _) _ = Arg 0
+getEdgeName ind _ _ = Arg ind
 
 treeToGraph :: (Eq m, Variable m) => Tree (CoreNode m) -> Gr (CoreNode m) EdgeRole
 treeToGraph t = uncurry mkGraph . (toList *** toList) . snd $ evalRWS (go t) () [1..]
   where go n@(Node a ns) = do
           i <- state $ head &&& tail
-          es <- forM ns $ \ n2 -> do
+          es <- forM (zip ns [0..]) $ \ (n2,ind) -> do
                 j <- go n2
-                return (j, i, getEdgeName n n2)
+                return (j, i, getEdgeName ind n n2)
           tell (singleton (i, a), fromList es)
           return i
