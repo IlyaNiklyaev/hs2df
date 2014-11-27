@@ -4,9 +4,21 @@ import Data.Graph.Inductive
 import Core.CoreGraph
 import System.IO
 import System.Directory
+import Data.Text.Lazy (unpack, pack)
+import Data.GraphViz
+import Data.GraphViz.Attributes.Complete
+
+graphParams :: GraphvizParams Int String String () String
+graphParams = nonClusteredParams {
+                fmtNode = fn,
+                fmtEdge = fe
+        }
+        where
+                fn (_,l) = [(Label . StrLabel . pack) l]
+                fe (_,_,l) = [(Label . StrLabel . pack) l]
 
 printGraph :: Gr String String -> String
-printGraph gr =  graphviz gr "infograph" (8.5, 11) (1, 1) Portrait
+printGraph gr =  unpack $ printDotGraph $ graphToDot graphParams gr
 
 showGraphNodes :: Gr CalcEntity EdgeRole -> Gr String String
 showGraphNodes = (nmap show).(emap show)
