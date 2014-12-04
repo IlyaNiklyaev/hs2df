@@ -16,7 +16,7 @@ import Data.DList (singleton, fromList, toList)
 import Control.Monad.RWS
 import Control.Arrow
 
-data CalcEntity = CEVar Var | CEExpr Var | CELit Literal | CEIf Type | CEPM Var Int | CEError
+data CalcEntity = CEVar Var | CEExpr Var | CELit Literal | CEDMerge Type | CEPM Var Int | CEError
 
 instance Eq CalcEntity where
         CEVar v1 == CEVar v2 = getVarName v1 == getVarName v2
@@ -25,7 +25,7 @@ instance Eq CalcEntity where
         CEVar v1 == CEExpr v2 = getVarName v1 == getVarName v2
         CEPM v1 i == CEPM v2 i2 = and [getVarName v1 == getVarName v2, i == i2]
         CELit l1 == CELit l2 = l1 == l2
-        CEIf t1 == CEIf t2 = (showSDoc $ pprType t1) == (showSDoc $ pprType t2)
+        CEDMerge t1 == CEDMerge t2 = (showSDoc $ pprType t1) == (showSDoc $ pprType t2)
         _ == _ = False
 
 instance Ord CalcEntity where
@@ -37,9 +37,9 @@ instance Ord CalcEntity where
         CELit l1 `compare` CELit l2 = l1 `compare` l2
         CELit _ `compare` _ = LT
         _ `compare` CELit _  = GT
-        (CEIf t1) `compare` (CEIf t2) = (showSDoc $ pprType t1) `compare` (showSDoc $ pprType t2)
-        CEIf _ `compare` _ = LT
-        _ `compare` CEIf _  = GT
+        (CEDMerge t1) `compare` (CEDMerge t2) = (showSDoc $ pprType t1) `compare` (showSDoc $ pprType t2)
+        CEDMerge _ `compare` _ = LT
+        _ `compare` CEDMerge _  = GT
         _ `compare` _ = EQ
         
 instance Show CalcEntity where
@@ -47,7 +47,7 @@ instance Show CalcEntity where
         show (CEPM v i) = "Pattern matching [" ++ show i ++ "]: " ++ getVarName v ++ ": " ++ (showSDoc $ pprType $ varType v)
         show (CEExpr v) = "Expr " ++ getVarName v ++ ": " ++ (showSDoc $ pprType $ varType v)
         show (CELit l) = showLit l
-        show (CEIf t) = "If"
+        show (CEDMerge t) = "If"
         show CEError = "Invalid node"
 
 data EdgeRole = Arg Int | Cond | AltHead Int | Alt Int | Default deriving (Show, Eq, Ord)
@@ -57,7 +57,7 @@ mkCalcEntity (CNName v) = CEVar v
 mkCalcEntity (CNPM v i) = CEPM v i
 mkCalcEntity (CNExpr (Var v)) = CEExpr v
 mkCalcEntity (CNExpr (Lit l)) = CELit l
-mkCalcEntity (CNExpr (Case _ _ t _)) = (CEIf t)
+mkCalcEntity (CNExpr (Case _ _ t _)) = (CEDMerge t)
 mkCalcEntity _ = CEError
 
 isVarNode :: LNode CalcEntity -> Bool

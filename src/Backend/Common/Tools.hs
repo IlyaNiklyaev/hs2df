@@ -24,7 +24,7 @@ calcEntityName gr n@(i, ce) = case ce of
         (CEVar v) -> if isParamLN gr n then "param" ++ (getVarName v) else "func" ++ show i
         (CEExpr v) -> if isParamLN gr n then "param" ++ (getVarName v) else "func" ++ show i
         (CEPM _ p) -> "pmatch_" ++ show p ++ "_" ++ show i
-        (CEIf _) -> "if" ++ show i
+        (CEDMerge _) -> "if" ++ show i
         _ -> "other" ++ show i
 
 calcEntityType :: Gr CalcEntity EdgeRole -> LNode CalcEntity -> Type
@@ -38,7 +38,7 @@ calcEntityTypePort gr n@(i, ce) = case ce of
         --(CEExpr v) -> if isParamLN gr n then ([res], res) else (filter (not.isDictLikeTy) args, res) where (args, res) = splitFunTys $ varType v
         (CEExpr v) -> splitFunTys $ varType v
         (CEPM v _) -> ([res], head $ filter (not.isDictLikeTy) args) where (args, res) = splitFunTys $ varType v
-        (CEIf t) -> (map (calcEntityType gr.(\ (_, x) -> (x, fromJust $ lab gr x))) $ sortBy (\ (r1, _) (r2, _) -> r1 `compare` r2) $ (\ (ins, _, _, _) -> ins) $ context gr i, t)
+        (CEDMerge t) -> (map (calcEntityType gr.(\ (_, x) -> (x, fromJust $ lab gr x))) $ sortBy (\ (r1, _) (r2, _) -> r1 `compare` r2) $ (\ (ins, _, _, _) -> ins) $ context gr i, t)
         --_ -> ([], )
 
 altCount :: Gr CalcEntity EdgeRole -> LNode CalcEntity -> Int

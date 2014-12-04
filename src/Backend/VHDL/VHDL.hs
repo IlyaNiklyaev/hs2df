@@ -18,7 +18,7 @@ getVHDLFile gr n@(i, ce) = case (ce, context gr i) of
         (CEVar _, _) -> if isParamLN gr n then (name, paramEntity gr n name) else (name, funcEntity gr n name)
         (CEExpr _, _) -> if isParamLN gr n then (name, paramEntity gr n name) else (name, funcEntity gr n name)
         (CEPM v _, _) -> (name, show v)
-        (CEIf _, _) -> (name, ifEntity gr name n)
+        (CEDMerge _, _) -> (name, ifEntity gr name n)
         (_, _) -> (name, "")
         where name = calcEntityName gr n
 
