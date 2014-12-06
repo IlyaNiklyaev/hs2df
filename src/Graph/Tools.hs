@@ -32,12 +32,13 @@ splitConditionalNodes gr = delEdges oldCondEdges $ insEdges newCondEdges2 $ insE
                                 oldCondEdges = (concatMap (\(_,(dmerge,_)) -> map (\(from,to,_) -> (from,to)) $ filter (\(_,_,l) -> case l of Cond -> True; AltHead _ -> True; _ -> False) $ inn gr dmerge ) dMergePairs)
                                 newCondEdges1 = (concatMap (\(cond,(dmerge,_)) -> map (\(from,_,l) -> (from,cond,l)) $ filter (\(_,_,l) -> case l of Cond -> True; AltHead _ -> True; _ -> False) $ inn gr dmerge ) dMergePairs)
                                 newCondEdges2 = (map (\(from,(to,_)) -> (from,to,Cond)) dMergePairs)
-                                condNodes = (map (\(node,(_,ce)) -> (node, toCondition ce)) dMergePairs)
+                                condNodes = (map (\(node,(dmerge,_)) -> (node, condNode dmerge)) dMergePairs)
                                 dMergePairs = zip (newNodes 100 gr) dMergeNodes
                                 dMergeNodes = filter isDMerge $ labNodes gr
                                 isDMerge (_,(CEDMerge _)) = True
                                 isDMerge _ = False
-                                toCondition _ = CEVar $ mkGlobalVar VanillaId (mkSystemName initTyVarUnique $ mkVarOcc "cond") intPrimTy vanillaIdInfo
+                                condNode dmerge = CEVar $ mkGlobalVar VanillaId (mkSystemName initTyVarUnique $ mkVarOcc "cond") (condType dmerge) vanillaIdInfo
+                                condType dmerge = mkFunTys (map (\(from,_,_) -> calcEntityType gr (from,fromJust $ lab gr from)) $ filter (\(_,_,l) -> case l of Cond -> True; AltHead _ -> True; _ -> False) $ inn gr dmerge) intPrimTy
 
 isParamLN ::  Gr CalcEntity EdgeRole -> LNode CalcEntity -> Bool
 isParamLN gr (i, ce) = case (ce, context gr i) of
