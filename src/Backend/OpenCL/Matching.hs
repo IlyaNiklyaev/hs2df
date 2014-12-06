@@ -1,14 +1,12 @@
 module Backend.OpenCL.Matching where
 
-import Backend.Common.Types
-import Backend.Common.Tools
 import Backend.OpenCL.Tools
 import Data.List (intercalate)
 import Data.Graph.Inductive
 import Core.CoreGraph
 import Core.CoreTypes
 import Graph.Tools
-import Type
+import Graph.Types
 
 getMatchBody :: Int -> TypePort -> String
 getMatchBody i ((inT:_),resT) = intercalate "\n" $ map (\ (ic,oc) -> "\t*" ++ getChannelName oc ++ " = *" ++ getChannelName ic ++ ";") $ zip (iChls !! index) oChls

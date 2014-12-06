@@ -44,5 +44,6 @@ executable GHCCore
                    Options,
                    Core.CoreTypes,
                    Backend.Common.Tools,
-                   Graph.Tools
+                   Graph.Tools,
+                   Graph.Types
 

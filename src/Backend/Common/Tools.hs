@@ -6,6 +6,7 @@ import Core.CoreGraph
 import Graph.Tools
 import Backend.Common.Types
 import Core.CoreTypes
+import Graph.Types
 
 
 primitivize :: TypePort -> TypePortPrimitive

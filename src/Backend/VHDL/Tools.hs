@@ -1,19 +1,14 @@
 module Backend.VHDL.Tools where
 
 import Data.Graph.Inductive
-import Type
-import Literal
-import Var
 import Data.Maybe (fromJust)
 import Core.CoreGraph
+import Graph.Types
 import Backend.Common.Types
-import Backend.Common.Tools
 import Backend.VHDL.Types
 import Backend.VHDL.BuiltIn.Types
-import Backend.VHDL.BuiltIn.Functions
-import Core.CoreTools
 import Graph.Tools
-import Data.List (sortBy, elemIndex)
+import Data.List (elemIndex)
 
 calcEntityTypeIface :: Gr CalcEntity EdgeRole -> LNode CalcEntity -> TypeIface
 calcEntityTypeIface gr = getTypeIface'.calcEntityType gr
