@@ -7,6 +7,7 @@ import Data.List (intercalate)
 import Data.Graph.Inductive
 import Core.CoreGraph
 import Core.CoreTypes
+import Graph.Tools
 import Type
 
 getMatchBody :: Int -> TypePort -> String

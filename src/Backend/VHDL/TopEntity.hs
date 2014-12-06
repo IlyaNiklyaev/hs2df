@@ -2,6 +2,7 @@ module Backend.VHDL.TopEntity where
 
 import Data.Graph.Inductive
 import Core.CoreGraph
+import Graph.Tools
 import Data.Graph.Analysis.Algorithms.Directed
 import Data.List
 import Backend.Common.Tools

@@ -8,6 +8,7 @@ import Data.List (intercalate)
 import Data.Graph.Inductive
 import Core.CoreGraph
 import Core.CoreTypes
+import Graph.Tools
 import DataCon
 import Id (isDataConId_maybe)
 

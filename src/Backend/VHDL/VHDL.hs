@@ -2,6 +2,7 @@ module Backend.VHDL.VHDL where
 
 import Data.Graph.Inductive
 import Core.CoreGraph
+import Graph.Tools
 import Control.Monad
 import System.IO
 import System.Directory

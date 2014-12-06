@@ -22,4 +22,5 @@ getFuncBody v = case getVarName v of
         "<=" -> "*data = *d0 <= *d1 ? true : false"
         "==" -> "*data = *d0 == *d1 ? true : false"
         "/=" -> "*data = *d0 != *d1 ? true : false"
+        "cond" -> "case switch"
         _ -> ""

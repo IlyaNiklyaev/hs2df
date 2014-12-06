@@ -43,5 +43,6 @@ executable GHCCore
                    Backend.OpenCL.Matching,
                    Options,
                    Core.CoreTypes,
-                   Backend.Common.Tools
+                   Backend.Common.Tools,
+                   Graph.Tools
 

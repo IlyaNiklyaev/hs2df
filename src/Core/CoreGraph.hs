@@ -8,18 +8,11 @@ import Core.CoreTools
 import Core.CoreTree
 import CoreSyn
 import Outputable (showSDoc)
-import Data.Graph.Analysis.Algorithms.Directed (rootsOf)
-import Data.List
 import Data.Graph.Inductive
 import Data.Tree
 import Data.DList (singleton, fromList, toList)
 import Control.Monad.RWS
 import Control.Arrow
-import IdInfo
-import OccName (mkVarOcc)
-import Name (mkSystemName)
-import Unique
-import TysPrim
 
 data CalcEntity = CEVar Var | CEExpr Var | CELit Literal | CEDMerge Type | CEPM Var Int | CEError
 
@@ -64,29 +57,6 @@ mkCalcEntity (CNExpr (Var v)) = CEExpr v
 mkCalcEntity (CNExpr (Lit l)) = CELit l
 mkCalcEntity (CNExpr (Case _ _ t _)) = (CEDMerge t)
 mkCalcEntity _ = CEError
-
-isVarNode :: LNode CalcEntity -> Bool
-isVarNode (_, CEVar _) = True
-isVarNode (_, CEExpr _) = True
-isVarNode _ = False
-
-mergeDupNodes :: Gr CalcEntity EdgeRole -> Gr CalcEntity EdgeRole
-mergeDupNodes gr = delNodes (map fst $ concatMap tail dups) $ insEdges (concatMap (\ (x:xs) -> [ (fst x, o, er) | (er, o) <- concatMap (\ (n, _) -> (\ (_, _, _, adj) -> adj) $ context gr n) xs]) dups) gr where
-        dups = filter (\ x -> length x > 1) $ groupBy (\ (_, n1) (_, n2) -> n1 == n2) $ sortBy (\ (_, n1) (_, n2) -> n1 `compare` n2) $ filter isVarNode $ rootsOf gr
-
-splitConditionalNodes :: Gr CalcEntity EdgeRole -> Gr CalcEntity EdgeRole
-splitConditionalNodes gr = delEdges oldCondEdges $ insEdges newCondEdges2 $ insEdges newCondEdges1 $ insNodes condNodes gr
-                        where   
-                                oldCondEdges = (concatMap (\(_,(dmerge,_)) -> map (\(from,to,_) -> (from,to)) $ filter (\(_,_,l) -> case l of Cond -> True; AltHead _ -> True; _ -> False) $ inn gr dmerge ) dMergePairs)
-                                newCondEdges1 = (concatMap (\(cond,(dmerge,_)) -> map (\(from,_,l) -> (from,cond,l)) $ filter (\(_,_,l) -> case l of Cond -> True; AltHead _ -> True; _ -> False) $ inn gr dmerge ) dMergePairs)
-                                newCondEdges2 = (map (\(from,(to,_)) -> (from,to,Cond)) dMergePairs)
-                                condNodes = (map (\(node,(_,ce)) -> (node, toCondition ce)) dMergePairs)
-                                dMergePairs = zip (newNodes 100 gr) dMergeNodes
-                                dMergeNodes = filter isDMerge $ labNodes gr
-                                isDMerge (_,(CEDMerge _)) = True
-                                isDMerge _ = False
-                                toCondition _ = CEVar $ mkGlobalVar VanillaId (mkSystemName initTyVarUnique $ mkVarOcc "cond") intPrimTy vanillaIdInfo
-
 
 getEdgeName :: (Eq m, Variable m) => Int -> Tree (CoreNode m) -> Tree (CoreNode m) -> EdgeRole
 getEdgeName ind (Node (CNExpr (Case _ _ _ _)) (_:(Node (CNExpr (Var _)) _):_)) _ = case ind of

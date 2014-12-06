@@ -12,6 +12,7 @@ import Data.Graph.Inductive
 import Data.Maybe (fromJust)
 import CoreSyn (CoreBndr)
 import Core.CoreGraph
+import Graph.Tools
 import Backend.Graphviz
 import Backend.VHDL.VHDL
 import Backend.OpenCL.OpenCL

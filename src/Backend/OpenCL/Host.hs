@@ -2,10 +2,10 @@ module Backend.OpenCL.Host where
 
 import Data.Graph.Inductive
 import Core.CoreGraph
+import Graph.Tools
 import Data.Graph.Analysis.Algorithms.Directed
 import Data.List
 import Backend.OpenCL.Types
-import Backend.Common.Tools
 import Backend.OpenCL.Tools
 import Data.Maybe (fromJust)
 
@@ -124,7 +124,6 @@ genHostBody gr = ("HaskellCL.cpp", unlines [
                 "\tcl_mem " ++ nm ++ "InBuffer = clCreateBuffer(context, CL_MEM_READ_ONLY|CL_MEM_COPY_HOST_PTR, sizeof(" ++ tp ++ "),(void *) &" ++ nm ++ ", NULL);"
                 ]) params,
         "\t" ++ busType ++ " out;\n",
-        --unlines $ concatMap (\ (from, to, pm) -> map (\(f, t, tp) -> "\tcl_mem " ++ edgePortName gr from to f t ++ "Buffer  = clCreateBuffer(context, CL_MEM_WRITE_ONLY , sizeof(" ++ tp ++ "), NULL, NULL);") pm) nodeMap,
         concatMap (\ln -> let
                                 tp = sType $ calcEntityTypeIface gr ln
                                 nm = calcEntityName gr ln

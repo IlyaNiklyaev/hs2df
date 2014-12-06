@@ -12,6 +12,7 @@ import Backend.VHDL.Types
 import Backend.VHDL.BuiltIn.Types
 import Backend.VHDL.BuiltIn.Functions
 import Core.CoreTools
+import Graph.Tools
 import Data.List (sortBy, elemIndex)
 
 calcEntityTypeIface :: Gr CalcEntity EdgeRole -> LNode CalcEntity -> TypeIface

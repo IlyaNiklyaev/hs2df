@@ -2,6 +2,7 @@ module Backend.VHDL.If where
 
 import Data.Graph.Inductive
 import Core.CoreGraph
+import Graph.Tools
 import Backend.Common.Tools
 import Backend.VHDL.Tools
 import Data.List (intercalate)

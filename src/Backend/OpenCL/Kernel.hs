@@ -2,7 +2,7 @@ module Backend.OpenCL.Kernel where
 
 import Data.Graph.Inductive
 import Core.CoreGraph
-import Backend.Common.Tools
+import Graph.Tools
 import Backend.OpenCL.Literal
 import Backend.OpenCL.Function
 import Backend.OpenCL.Matching

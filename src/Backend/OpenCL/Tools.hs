@@ -3,6 +3,7 @@ module Backend.OpenCL.Tools where
 import Data.Graph.Inductive
 import Core.CoreGraph
 import Core.CoreTypes
+import Graph.Tools
 import Backend.Common.Types
 import Backend.Common.Tools
 import Backend.OpenCL.Types
