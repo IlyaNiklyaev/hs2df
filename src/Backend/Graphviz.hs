@@ -7,12 +7,6 @@ import System.Directory
 import Data.Text.Lazy (unpack, pack, empty)
 import Data.GraphViz
 import Data.GraphViz.Attributes.Complete
-import IdInfo
-import Var
-import OccName (mkVarOcc)
-import Name (mkSystemName)
-import Unique
-import TysPrim
 
 graphParams :: GraphvizParams Int CalcEntity EdgeRole () CalcEntity
 graphParams = nonClusteredParams {
@@ -37,16 +31,9 @@ insRoot gr = let [nnode] = newNodes 1 gr in insEdge (head $ rdfs' gr,nnode,"data
 addChannelInterfaces :: Gr String String -> Gr String String
 addChannelInterfaces gr = insEdges (concatMap (\ (from,to) -> [(from,to,"ack"),(to,from,"first"),(to,from,"next")]) (edges gr)) gr
 
-splitConditionalNodes :: Gr CalcEntity EdgeRole -> Gr CalcEntity EdgeRole
-splitConditionalNodes gr = insNodes (zip (newNodes 100 gr) (map (toCondition.snd) dMergeNodes)) gr
-                        where   dMergeNodes = filter isDMerge $ labNodes gr
-                                isDMerge (_,(CEDMerge _)) = True
-                                isDMerge _ = False
-                                toCondition _ = CEVar $ mkGlobalVar VanillaId (mkSystemName initTyVarUnique $ mkVarOcc "cond") intPrimTy vanillaIdInfo
-
 genGraphviz :: Gr CalcEntity EdgeRole -> String -> IO ()
 genGraphviz gr dir = do
         createDirectoryIfMissing True dir
         h <- openFile (dir ++ "graph.dot") WriteMode
-        hPutStr h $ printGraph $ splitConditionalNodes gr
+        hPutStr h $ printGraph gr
         hClose h

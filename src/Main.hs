@@ -25,7 +25,7 @@ modifyAST :: Tree (CoreNode CoreBndr) -> Tree (CoreNode CoreBndr)
 modifyAST = substLets.elimForAlls.nameApps.foldLambdas.foldApps
 
 modifyGraph :: Gr (CoreNode CoreBndr) EdgeRole -> Gr CalcEntity EdgeRole
-modifyGraph = mergeDupNodes.(nmap mkCalcEntity)
+modifyGraph = splitConditionalNodes.mergeDupNodes.(nmap mkCalcEntity)
 
 setDynFlags :: [DynFlag] -> DynFlags -> DynFlags
 setDynFlags fls dflags = foldl dopt_set dflags fls
